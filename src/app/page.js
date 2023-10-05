@@ -1,14 +1,17 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
+
 import { CustomerCard } from '@/components/customer-card.js';
 import { Field } from '@/components/field.js';
 import { Widget } from '@/components/widget.js';
 import customerdata from '@/data/customers.json';
-import { useEffect, useState } from 'react';
 
 export default function Home() {
 	const [customer, setCustomer] = useState({ firstName: '', lastName: '', email: '', phone: '' });
 	const [customers, setCustomers] = useState(customerdata.data.listCustomers);
+	const customerLength = useRef();
+	customerLength.current = customers.length;
 
 	const generalChange = (event) => {
 		event.stopPropagation();
@@ -34,8 +37,19 @@ export default function Home() {
 	};
 
 	function reset() {
+		const newobj = { firstName: '', lastName: '', phone: '' };
+		if (customer.email === customers[0].emails[0]) newobj.email = '';
+
 		setCustomers(customerdata.data.listCustomers);
-		setCustomer((c) => ({ ...c, firstName: '', lastName: '', phone: '' }));
+		setCustomer((c) => ({ ...c, ...newobj }));
+	}
+
+	function setEmail() {
+		setTimeout(() => {
+			if (customerLength.current === 1) {
+				setCustomer((c) => ({ ...c, email: customers[0].emails[0] }));
+			}
+		}, 100);
 	}
 
 	useEffect(() => {
@@ -66,7 +80,13 @@ export default function Home() {
 							value={customer.lastName}
 							onChange={generalChange}
 						/>
-						<Field name="email" label="Email" value={customer.email} onChange={generalChange} />
+						<Field
+							name="email"
+							label="Email"
+							value={customer.email}
+							onChange={generalChange}
+							onBlur={setEmail}
+						/>
 						<Field
 							disabled={customers.length === 1}
 							name="phone"
